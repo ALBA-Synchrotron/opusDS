@@ -89,6 +89,12 @@ class SocketListenerThread(Thread):
         if cmd.lower() == "exit":
             self.shutdown()
 
+        # Take snapshot
+        if cmd.startswith('take_snapshot'):
+            _, fullname = cmd.split(' ', 1)
+            self.take_snapshot(fullname)
+            return "{OK}\n"
+
         # Serial commands
         if cmd.startswith('send_serial_cmd'):
             _, serial_cmd = cmd.split(' ', 1)
@@ -229,6 +235,18 @@ class SocketListenerThread(Thread):
                 out += self._ser.read(1)
             return out
 
+    def take_snapshot(self, fullname):
+        # Move to visible
+        self.parse_cmd("COMMAND_LINE SendCommand(0,{UNI='MOT56=2'});")
+        # Take snapshot
+        cap = cv2.VideoCapture(0)
+        ret, im = cap.read()
+        # writes image to disk
+        cv2.imwrite(fullname, im)
+        # Release camera
+        cap.release()
+        # Move to IR
+        self.parse_cmd("COMMAND_LINE SendCommand(0,+{UNI='MOT56=1'});")
 
 def run_opus_server():
     lock = Lock()
