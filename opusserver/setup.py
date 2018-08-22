@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 # The version is updated automatically with bumpversion
 # Do not update manually
-__version = '0.3.0-alpha'
+__version = '0.4.0-alpha'
 
 long_description = """This is a Windows socket server to manipulate the OPUS
 Spectroscopy Software (BRUKER).
