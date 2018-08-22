@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import cv2
 import time
 import serial
 import socket
@@ -88,6 +88,12 @@ class SocketListenerThread(Thread):
     def parse_cmd(self, cmd):
         if cmd.lower() == "exit":
             self.shutdown()
+
+        # Take snapshot
+        if cmd.startswith('take_snapshot'):
+            _, fullname = cmd.split(' ', 1)
+            self.take_snapshot(fullname)
+            return "OK\n"
 
         # Serial commands
         if cmd.startswith('send_serial_cmd'):
@@ -229,6 +235,25 @@ class SocketListenerThread(Thread):
                 out += self._ser.read(1)
             return out
 
+    def take_snapshot(self, fullname):
+        # Move to visible
+        print "move to visible"
+        self.parse_cmd("COMMAND_LINE SendCommand(0,{UNI='MOT56=2'});\n")
+        # Take snapshot
+        print "take picture"
+        cap = cv2.VideoCapture(0)
+        #cap.set(cv2.CV_CAP_PROP_FRAME_WIDTH,1600)
+        cap.set(3, 1600)
+        #cap.set(cv2.CV_CAP_PROP_FRAME_HEIGHT,1200)
+        cap.set(4, 1200)
+        ret, im = cap.read()
+        # writes image to disk
+        cv2.imwrite(fullname, im)
+        # Release camera
+        cap.release()
+        # Move to IR
+        print "move to IR"
+        self.parse_cmd("COMMAND_LINE SendCommand(0,+{UNI='MOT56=1'});\n")
 
 def run_opus_server():
     lock = Lock()
@@ -248,6 +273,7 @@ if __name__ == '__main__':
     """ TEST IT
     import socket, time
     ip = socket.gethostbyname(socket.gethostname()) # For local test
+    ip = "84.89.223.120"
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = (ip, 5000)
     sock.connect(server_address)
