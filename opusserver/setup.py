@@ -6,12 +6,9 @@ from setuptools import setup, find_packages
 # Do not update manually
 __version = '0.4.0-alpha'
 
-long_description = """This is a DS to remotely manipulate the OPUS
-Spectroscopy Software (BRUKER) from Linux to Windows.
-
-The device server send OPUS commands to a socket sever (opusserver) included in
-the project)  that must be run in the same machine that the OPUS Spectroscopy
-Software, the server set the communication with the software via a named PIPE."""
+long_description = """This is a Windows socket server to manipulate the OPUS
+Spectroscopy Software (BRUKER).
+"""
 
 
 classifiers = [
@@ -23,19 +20,18 @@ classifiers = [
 ]
 
 setup(
-    name='opusDS',
+    name='opusServer',
     version=__version,
     packages=find_packages(),
     entry_points={
-        'console_scripts': ['opusDS = opusds.opusds:runDS']
+        'console_scripts': ['opusServer = opusServer.opusserver:run_opus_server']
     }, # METADATA
     author='Carlos Falcon',
     author_email='cfalcon@cells.es',
     include_package_data=True,
     license='LGPL',
-    description='Opus Device Server',
+    description='Opus Socket Server',
     long_description=long_description,
     requires=['setuptools (>=1.1)'],
-    install_requires=['PyTango'],
     classifiers=classifiers
 )
