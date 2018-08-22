@@ -63,6 +63,8 @@ class OpusDS(Device):
 
         if not self.opusState.isAlive():
             self.opusState.start()
+        # Allow state change event
+        self.set_change_event('state', True, False)
 
     def delete_device(self):
         self.info_stream('delete_device')
@@ -79,7 +81,8 @@ class OpusDS(Device):
         if self.sock is None:
             # create socket
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.settimeout(10)
+            #self.sock.settimeout(1000) # Disable timeout
+
         # Try to connect the socket
         try:
             self.sock.connect(self.server_address)
@@ -121,11 +124,13 @@ class OpusDS(Device):
     def _setStatusRunning(self, cmd):
         self.set_state(PyTango.DevState.RUNNING)
         self.set_status('Running cmd: {0}'.format(cmd))
+        self.push_change_event('state')
 
     def _setStatusReady(self):
         self.set_state(PyTango.DevState.ON)
         self.set_status('Ready')
         # TODO: add push event
+        self.push_change_event('state')
 
     def _getMacroState(self):
         if self._macro_id is not None:
