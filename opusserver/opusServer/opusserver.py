@@ -89,6 +89,21 @@ class SocketListenerThread(Thread):
         if cmd.lower() == "exit":
             self.shutdown()
 
+        # get_Z_unit
+        if cmd.startswith('get_Z_unit'):
+            process = subprocess.Popen(['net', 'use'], stdout=subprocess.PIPE)
+            output, error = process.communicate()
+            if error is None:
+                for line in output.split('\n'):
+                    if 'Z:' in line:
+                        zunit = line[line.find('\\'):].rstrip().replace('\\',
+                                                                        '/')
+                        break
+            else:
+                # Default path
+                zunit = "/controls/tmp/"
+            return "{}\n".format(zunit)
+
         # Take snapshot
         if cmd.startswith('take_snapshot'):
             _, fullname = cmd.split(' ', 1)
